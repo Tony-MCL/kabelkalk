@@ -1,0 +1,83 @@
+.section-card,
+.summary-card,
+.basis-card,
+.result-item {
+  border: 1px solid #d7dee8;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 5px 14px rgba(15, 23, 42, 0.04);
+}
+
+.section-card-header {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #172033;
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.section-card-header h2 {
+  margin: 0 0 1px;
+  font-size: 16px;
+}
+
+.section-card-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.section-card-header > span {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #2563eb;
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  font-weight: 800;
+  flex: 0 0 auto;
+}
+
+.section-card-body {
+  border-top: 1px solid #e2e8f0;
+  padding: 10px 12px 12px;
+}
+
+.summary-card,
+.basis-card {
+  padding: 12px;
+}
+
+.optional-section-toggle {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.optional-section-toggle input {
+  width: auto;
+  min-height: auto;
+  margin-top: 3px;
+}
+
+.optional-section-toggle h2 {
+  margin: 0 0 1px;
+  font-size: 16px;
+}
+
+.optional-section-toggle p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
+}
