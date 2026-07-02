@@ -22,8 +22,15 @@ import '../../styles/forms.css'
 import '../../styles/results.css'
 import '../../styles/project.css'
 
-export default function LowVoltageCableCalculator({ onOpenCableList }) {
-  const { project, updateProject, updateCalculation, updateCalculationGroup, saveCable } = useProject()
+export default function LowVoltageCableCalculator({ editingCableId, onEditingDone, onOpenCableList }) {
+  const {
+    project,
+    updateProject,
+    updateCalculation,
+    updateCalculationGroup,
+    saveCable,
+    updateSavedCable,
+  } = useProject()
   const [showProjectInfo, setShowProjectInfo] = useState(false)
 
   const calculation = project.calculations.find((item) => item.type === 'lowVoltageCable')
@@ -117,8 +124,8 @@ export default function LowVoltageCableCalculator({ onOpenCableList }) {
   function handleSaveCable() {
     if (!result || !calculation.title.trim()) return
 
-    saveCable({
-      id: crypto.randomUUID(),
+    const savedCable = {
+      id: editingCableId ?? crypto.randomUUID(),
       name: calculation.title.trim(),
       cable: getCableDescription(),
       savedAt: new Date().toLocaleDateString('no-NO'),
@@ -130,7 +137,15 @@ export default function LowVoltageCableCalculator({ onOpenCableList }) {
       currentRating,
       cableDesignCurrent,
       calculation: structuredClone(calculation),
-    })
+    }
+
+    if (editingCableId) {
+      updateSavedCable(editingCableId, savedCable)
+      onEditingDone()
+      return
+    }
+
+    saveCable(savedCable)
   }
 
   const canSaveCable = Boolean(result && calculation.title.trim())
@@ -166,7 +181,7 @@ export default function LowVoltageCableCalculator({ onOpenCableList }) {
             disabled={!canSaveCable}
             title={!calculation.title.trim() ? 'Gi kabelen et navn før den lagres' : undefined}
           >
-            Lagre kabel
+            {editingCableId ? 'Oppdater kabel' : 'Lagre kabel'}
           </button>
         </div>
       </section>

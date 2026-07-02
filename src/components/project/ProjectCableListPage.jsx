@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function ProjectCableListPage({ project, onBack, onDelete }) {
+export default function ProjectCableListPage({ project, onBack, onDelete, onEdit, onCopy }) {
   const [openId, setOpenId] = useState(null)
   const savedCables = project.savedCables ?? []
 
@@ -13,7 +13,7 @@ export default function ProjectCableListPage({ project, onBack, onDelete }) {
       <div className="project-list-header no-print">
         <div>
           <p className="eyebrow">Prosjekt</p>
-          <h1>Kabler i prosjektet</h1>
+          <h1>Beregninger i prosjektet</h1>
           <p>{project.name}</p>
         </div>
 
@@ -29,10 +29,26 @@ export default function ProjectCableListPage({ project, onBack, onDelete }) {
       </div>
 
       <div className="print-header print-only">
-        <h1>Kabelberegninger</h1>
-        <p>Kunde: {project.customer || '-'}</p>
-        <p>Prosjekt / anlegg: {project.facility || project.name || '-'}</p>
-        <p>Dato: {new Date().toLocaleDateString('no-NO')}</p>
+        {project.logoDataUrl && (
+          <img className="print-logo" src={project.logoDataUrl} alt="" />
+        )}
+
+        <div>
+          <h1>Beregningsrapport</h1>
+
+          <div className="print-meta">
+            {project.company && <p>Firma: {project.company}</p>}
+            {project.customer && <p>Kunde: {project.customer}</p>}
+            {project.name && <p>Prosjekt: {project.name}</p>}
+            {project.facility && <p>Anlegg: {project.facility}</p>}
+            {project.description && <p>Beskrivelse: {project.description}</p>}
+            <p>Dato: {new Date().toLocaleDateString('no-NO')}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="print-footer print-only">
+        Beregningsrapport generert med Manage Tools – morningcoffeelabs.no
       </div>
 
       {savedCables.length === 0 ? (
@@ -59,7 +75,7 @@ export default function ProjectCableListPage({ project, onBack, onDelete }) {
                 </button>
 
                 <div className={`print-cable-report ${isOpen ? 'screen-open' : ''}`}>
-                  <CableReport item={item} onDelete={onDelete} />
+                  <CableReport item={item} onDelete={onDelete} onEdit={onEdit} onCopy={onCopy} />
                 </div>
               </article>
             )
@@ -70,7 +86,7 @@ export default function ProjectCableListPage({ project, onBack, onDelete }) {
   )
 }
 
-function CableReport({ item, onDelete }) {
+function CableReport({ item, onDelete, onEdit, onCopy }) {
   const calculation = item.calculation
   const supply = calculation?.supply ?? {}
   const installation = calculation?.installation ?? {}
@@ -177,7 +193,22 @@ function CableReport({ item, onDelete }) {
       </section>
 
       <div className="project-cable-actions no-print">
-        <button type="button" onClick={() => onDelete(item.id)}>
+        <button type="button" className="neutral-action" onClick={() => onEdit(item)}>
+          Rediger kabel
+        </button>
+
+        <button type="button" className="neutral-action" onClick={() => onCopy(item)}>
+          Kopier kabel
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            if (window.confirm(`Slette "${item.name}" fra prosjektet?`)) {
+              onDelete(item.id)
+            }
+          }}
+        >
           Slett kabel
         </button>
       </div>

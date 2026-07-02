@@ -27,14 +27,18 @@ export function ProjectProvider({ children }) {
       updatedAt: new Date().toISOString(),
       calculations: current.calculations.map((calculation) =>
         calculation.id === calculationId
-          ? {
-              ...calculation,
-              [group]: {
-                ...calculation[group],
-                ...values,
-              },
-            }
+          ? { ...calculation, [group]: { ...calculation[group], ...values } }
           : calculation
+      ),
+    }))
+  }
+
+  function replaceCalculation(calculationId, nextCalculation) {
+    setProject((current) => ({
+      ...current,
+      updatedAt: new Date().toISOString(),
+      calculations: current.calculations.map((calculation) =>
+        calculation.id === calculationId ? nextCalculation : calculation
       ),
     }))
   }
@@ -44,6 +48,16 @@ export function ProjectProvider({ children }) {
       ...current,
       updatedAt: new Date().toISOString(),
       savedCables: [savedCable, ...(current.savedCables ?? [])],
+    }))
+  }
+
+  function updateSavedCable(savedCableId, savedCable) {
+    setProject((current) => ({
+      ...current,
+      updatedAt: new Date().toISOString(),
+      savedCables: (current.savedCables ?? []).map((item) =>
+        item.id === savedCableId ? savedCable : item
+      ),
     }))
   }
 
@@ -61,7 +75,9 @@ export function ProjectProvider({ children }) {
       updateProject,
       updateCalculation,
       updateCalculationGroup,
+      replaceCalculation,
       saveCable,
+      updateSavedCable,
       deleteSavedCable,
     }),
     [project]

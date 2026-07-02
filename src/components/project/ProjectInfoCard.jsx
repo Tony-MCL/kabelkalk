@@ -2,14 +2,23 @@ import SectionCard from '../cards/SectionCard'
 import FormField from '../fields/FormField'
 
 export default function ProjectInfoCard({ project, onChange, defaultOpen = false }) {
+  function handleLogoChange(event) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+
+    reader.onload = () => {
+      onChange({ logoDataUrl: reader.result })
+    }
+
+    reader.readAsDataURL(file)
+  }
+
   return (
-    <SectionCard
-      title="Prosjektinformasjon"
-      subtitle="Brukes senere i rapport og PDF"
-      defaultOpen={defaultOpen}
-    >
-      <div className="form-grid">
-        <FormField label="Prosjektnavn">
+    <SectionCard title="Prosjektinformasjon" subtitle="Brukes i PDF og rapport" defaultOpen={defaultOpen}>
+      <div className="project-info-grid">
+        <FormField label="Prosjekt">
           <input
             type="text"
             value={project.name}
@@ -32,16 +41,36 @@ export default function ProjectInfoCard({ project, onChange, defaultOpen = false
             onChange={(event) => onChange({ facility: event.target.value })}
           />
         </FormField>
-      </div>
 
-      <div className="form-row-full">
-        <FormField label="Beskrivelse">
-          <textarea
-            rows="3"
-            value={project.description}
-            onChange={(event) => onChange({ description: event.target.value })}
+        <FormField label="Firma">
+          <input
+            type="text"
+            value={project.company ?? ''}
+            onChange={(event) => onChange({ company: event.target.value })}
           />
         </FormField>
+      </div>
+
+      <FormField label="Beskrivelse">
+        <textarea
+          value={project.description}
+          onChange={(event) => onChange({ description: event.target.value })}
+        />
+      </FormField>
+
+      <div className="logo-upload-row">
+        <FormField label="Logo">
+          <input type="file" accept="image/*" onChange={handleLogoChange} />
+        </FormField>
+
+        {project.logoDataUrl && (
+          <div className="logo-preview-box">
+            <img src={project.logoDataUrl} alt="Valgt logo" />
+            <button type="button" onClick={() => onChange({ logoDataUrl: '' })}>
+              Fjern logo
+            </button>
+          </div>
+        )}
       </div>
     </SectionCard>
   )

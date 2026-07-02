@@ -5,6 +5,8 @@ export function createProject(overrides = {}) {
     customer: '',
     facility: '',
     description: '',
+    company: '',
+    logoDataUrl: '',
     calculations: [],
     savedCables: [],
     createdAt: new Date().toISOString(),

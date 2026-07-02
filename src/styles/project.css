@@ -636,4 +636,80 @@ textarea {
     font-size: 8px !important;
     padding: 1px 5px !important;
   }
-}s
+}
+
+.project-cable-actions {
+  gap: 8px;
+}
+
+.project-cable-actions .neutral-action {
+  border: 1px solid #cbd5e1;
+  color: #172033;
+  background: #ffffff;
+}
+
+.project-info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.logo-upload-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  margin-top: 12px;
+}
+
+.logo-preview-box {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.logo-preview-box img {
+  max-width: 160px;
+  max-height: 56px;
+  object-fit: contain;
+}
+
+.logo-preview-box button {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+@media print {
+  .print-header {
+    display: flex !important;
+    gap: 12mm;
+    align-items: flex-start;
+    margin-bottom: 8mm;
+    padding-bottom: 4mm;
+    border-bottom: 2px solid #2563eb;
+  }
+
+  .print-logo {
+    max-width: 32mm;
+    max-height: 18mm;
+    object-fit: contain;
+  }
+
+  .print-meta p {
+    margin: 2px 0;
+    font-size: 10px;
+  }
+
+  .print-footer {
+    position: fixed;
+    left: 12mm;
+    right: 12mm;
+    bottom: 5mm;
+    font-size: 8px;
+    color: #64748b;
+    text-align: right;
+  }
+}

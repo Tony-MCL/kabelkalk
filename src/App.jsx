@@ -7,12 +7,35 @@ import './App.css'
 function App() {
   const [activeModule, setActiveModule] = useState(null)
   const [activePage, setActivePage] = useState('calculator')
-  const { project, deleteSavedCable } = useProject()
+  const [editingCableId, setEditingCableId] = useState(null)
+  const { project, deleteSavedCable, replaceCalculation } = useProject()
+
+  function openCableForEdit(savedCable) {
+    const calculation = project.calculations.find((item) => item.type === 'lowVoltageCable')
+    if (!calculation) return
+
+    replaceCalculation(calculation.id, structuredClone(savedCable.calculation))
+    setEditingCableId(savedCable.id)
+    setActivePage('calculator')
+  }
+
+  function copyCable(savedCable) {
+    const calculation = project.calculations.find((item) => item.type === 'lowVoltageCable')
+    if (!calculation) return
+
+    const copiedCalculation = structuredClone(savedCable.calculation)
+    copiedCalculation.id = calculation.id
+    copiedCalculation.title = `${savedCable.name} - kopi`
+
+    replaceCalculation(calculation.id, copiedCalculation)
+    setEditingCableId(null)
+    setActivePage('calculator')
+  }
 
   if (activeModule === 'lowVoltageCable') {
     return (
       <main className="app-shell">
-        <div className="top-bar">
+        <div className="top-bar no-print">
           <button type="button" className="back-button" onClick={() => setActiveModule(null)}>
             ← Tilbake
           </button>
@@ -26,9 +49,15 @@ function App() {
             project={project}
             onBack={() => setActivePage('calculator')}
             onDelete={deleteSavedCable}
+            onEdit={openCableForEdit}
+            onCopy={copyCable}
           />
         ) : (
-          <LowVoltageCableCalculator onOpenCableList={() => setActivePage('cableList')} />
+          <LowVoltageCableCalculator
+            editingCableId={editingCableId}
+            onEditingDone={() => setEditingCableId(null)}
+            onOpenCableList={() => setActivePage('cableList')}
+          />
         )}
       </main>
     )

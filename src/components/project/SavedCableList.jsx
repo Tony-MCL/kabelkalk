@@ -3,7 +3,7 @@ export default function SavedCableList({ savedCables, onDelete }) {
 
   return (
     <section className="saved-cables-card">
-      <h2>Lagrede kabler i prosjektet</h2>
+      <h2>Lagrede beregninger i prosjektet</h2>
 
       <div className="saved-cables-list">
         {savedCables.map((item) => (
