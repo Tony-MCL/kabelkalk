@@ -233,3 +233,45 @@ body {
 .mcl-toolbar .primary-action:hover:not(:disabled) {
   color: #6f4523;
 }
+
+.mcl-header-brand {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.mcl-managetools-logo {
+  display: block;
+  width: auto;
+  height: 54px;
+  object-fit: contain;
+}
+
+.mcl-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mcl-header-link {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 8px;
+  color: #6b655f;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.mcl-header-link:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #1b1a17;
+}
+
+@media (max-width: 760px) {
+  .mcl-managetools-logo {
+    height: 42px;
+  }
+}

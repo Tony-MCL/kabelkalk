@@ -11,18 +11,17 @@ export default function AppShell({
       <header className="mcl-header no-print">
         <div className="mcl-header-inner">
           <div className="mcl-header-brand">
-            <div className="mcl-header-logo-mark">☕</div>
-
-            <div>
-              <p className="mcl-header-kicker">Morning Coffee Labs</p>
-              <h1>Manage Tools</h1>
-            </div>
+            <img
+              src="/managetools_logo.png"
+              alt="Manage Tools"
+              className="mcl-managetools-logo"
+            />
           </div>
 
           <div className="mcl-header-actions">
-            <span className="mcl-plan-pill">Plan: pro</span>
-            <button type="button" className="mcl-header-link">Konto</button>
-            <button type="button" className="mcl-header-link">Hjelp</button>
+            <button type="button" className="mcl-header-link">
+              Hjelp
+            </button>
           </div>
         </div>
       </header>
