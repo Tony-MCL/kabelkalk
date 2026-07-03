@@ -9,10 +9,6 @@ export default function ProjectHeader({ project, onEditProject }) {
           {project.facility ? ` · ${project.facility}` : ''}
         </p>
       </div>
-
-      <button type="button" className="project-edit-button" onClick={onEditProject}>
-        Rediger prosjektinfo
-      </button>
     </section>
   )
 }

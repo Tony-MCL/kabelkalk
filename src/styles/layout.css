@@ -3,10 +3,17 @@
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 14px;
+  align-items: center;
 }
 
 .module-heading {
   margin-bottom: 14px;
+}
+
+.module-heading h1,
+.module-heading h2 {
+  margin-top: 0;
+  font-weight: 600;
 }
 
 .calculator-layout {
@@ -48,5 +55,12 @@
 
   .calculator-right {
     position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .top-bar {
+    align-items: stretch;
+    flex-direction: column;
   }
 }

@@ -3,9 +3,9 @@
 .basis-card,
 .result-item {
   border: 1px solid #d7dee8;
-  border-radius: 10px;
+  border-radius: 12px;
   background: #ffffff;
-  box-shadow: 0 5px 14px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.035);
 }
 
 .section-card-header {
@@ -22,27 +22,28 @@
 }
 
 .section-card-header h2 {
-  margin: 0 0 1px;
+  margin: 0 0 2px;
   font-size: 16px;
+  font-weight: 600;
 }
 
 .section-card-header p {
   margin: 0;
   color: #64748b;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .section-card-header > span {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 999px;
   background: #eff6ff;
   color: #2563eb;
   display: grid;
   place-items: center;
-  font-size: 17px;
-  font-weight: 800;
+  font-size: 15px;
+  font-weight: 600;
   flex: 0 0 auto;
 }
 
@@ -71,13 +72,14 @@
 }
 
 .optional-section-toggle h2 {
-  margin: 0 0 1px;
+  margin: 0 0 2px;
   font-size: 16px;
+  font-weight: 600;
 }
 
 .optional-section-toggle p {
   margin: 0;
   color: #64748b;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 400;
 }

@@ -1,12 +1,8 @@
 import { useState } from 'react'
 
-export default function ProjectCableListPage({ project, onBack, onDelete, onEdit, onCopy }) {
+export default function ProjectCableListPage({ project, onDelete, onEdit, onCopy }) {
   const [openId, setOpenId] = useState(null)
   const savedCables = project.savedCables ?? []
-
-  function handlePrint() {
-    window.print()
-  }
 
   return (
     <section className="project-list-page">
@@ -14,41 +10,14 @@ export default function ProjectCableListPage({ project, onBack, onDelete, onEdit
         <div>
           <p className="eyebrow">Prosjekt</p>
           <h1>Beregninger i prosjektet</h1>
-          <p>{project.name}</p>
-        </div>
-
-        <div className="module-actions">
-          <button type="button" className="secondary-action" onClick={handlePrint}>
-            Eksporter PDF
-          </button>
-
-          <button type="button" className="back-button" onClick={onBack}>
-            ← Tilbake til kalkulator
-          </button>
+          <p>{project.name || 'Nytt prosjekt'}</p>
         </div>
       </div>
 
-      <div className="print-header print-only">
-        {project.logoDataUrl && (
-          <img className="print-logo" src={project.logoDataUrl} alt="" />
-        )}
-
-        <div>
-          <h1>Beregningsrapport</h1>
-
-          <div className="print-meta">
-            {project.company && <p>Firma: {project.company}</p>}
-            {project.customer && <p>Kunde: {project.customer}</p>}
-            {project.name && <p>Prosjekt: {project.name}</p>}
-            {project.facility && <p>Anlegg: {project.facility}</p>}
-            {project.description && <p>Beskrivelse: {project.description}</p>}
-            <p>Dato: {new Date().toLocaleDateString('no-NO')}</p>
-          </div>
-        </div>
-      </div>
+      <PrintReportHeader project={project} />
 
       <div className="print-footer print-only">
-        Beregningsrapport generert med Manage Tools – morningcoffeelabs.no
+        Denne beregningsrapporten ble generert med Manage Tools – morningcoffeelabs.no
       </div>
 
       {savedCables.length === 0 ? (
@@ -83,6 +52,47 @@ export default function ProjectCableListPage({ project, onBack, onDelete, onEdit
         </div>
       )}
     </section>
+  )
+}
+
+function PrintReportHeader({ project }) {
+  const metaRows = [
+    ['Firma', project.company],
+    ['Kontaktperson', project.contactPerson],
+    ['Adresse', project.address],
+    ['Telefon', project.phone],
+    ['E-post', project.email],
+    ['Kunde', project.customer],
+    ['Prosjekt', project.name],
+    ['Anlegg', project.facility],
+    ['Beskrivelse', project.description],
+    ['Dato', new Date().toLocaleDateString('no-NO')],
+  ].filter(([, value]) => String(value ?? '').trim())
+
+  return (
+    <header className="print-header print-only">
+      <div className="print-header-content">
+        <div className="print-header-main">
+          <h1>Beregningsrapport</h1>
+
+          {metaRows.length > 0 && (
+            <div className="print-meta">
+              {metaRows.map(([label, value]) => (
+                <p key={label}>
+                  <strong>{label}:</strong> {value}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {project.logoDataUrl && (
+          <div className="print-logo-wrap">
+            <img className="print-logo" src={project.logoDataUrl} alt="" />
+          </div>
+        )}
+      </div>
+    </header>
   )
 }
 
@@ -257,7 +267,7 @@ function ReportDivider() {
 
 function getSourceText(supply) {
   if (supply.sourceType === 'transformer') {
-    return `Trafo, ${supply.sourceCurrent ?? '-'} kVA, uk ${supply.transformerUkPercent ?? 6} %`
+    return `Trafo, ${supply.transformerKva ?? supply.sourceCurrent ?? '-'} kVA, uk ${supply.transformerUkPercent ?? 6} %`
   }
 
   if (supply.sourceType === 'fuse') {
@@ -266,6 +276,10 @@ function getSourceText(supply) {
 
   if (supply.sourceType === 'motorProtection') {
     return `Motorvern, ${supply.sourceCurrent ?? '-'} A`
+  }
+
+  if (supply.sourceType === 'manual') {
+    return `Manuell verdi, ${supply.sourceCurrent ?? '-'} A`
   }
 
   return `Effektbryter, ${supply.sourceCurrent ?? '-'} A`

@@ -17,7 +17,7 @@
 .eyebrow {
   margin: 0 0 3px;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #2563eb;
@@ -26,6 +26,7 @@
 h1 {
   margin: 0;
   font-size: 32px;
+  font-weight: 600;
   line-height: 1.05;
 }
 
@@ -42,7 +43,7 @@ h1 {
   border-radius: 8px;
   padding: 6px 10px;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 600;
   color: #172033;
   background: #ffffff;
   cursor: pointer;
@@ -71,6 +72,7 @@ h1 {
 .module-card h2 {
   margin: 0 0 6px;
   font-size: 18px;
+  font-weight: 600;
 }
 
 .module-card p {
@@ -80,7 +82,7 @@ h1 {
 }
 
 .module-card span {
-  font-weight: 800;
+  font-weight: 600;
   color: #2563eb;
   font-size: 14px;
 }
@@ -110,4 +112,22 @@ h1 {
   .module-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.home-project-info {
+  margin-bottom: 16px;
+}
+
+.home-module-heading {
+  margin: 8px 0 10px;
+}
+
+.home-module-heading h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.home-intro {
+  margin-bottom: 14px;
 }

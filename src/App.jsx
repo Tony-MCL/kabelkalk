@@ -1,14 +1,27 @@
 import { useState } from 'react'
 import LowVoltageCableCalculator from './components/lowVoltage/LowVoltageCableCalculator'
+import AppShell from './components/layout/AppShell'
 import ProjectCableListPage from './components/project/ProjectCableListPage'
+import ProjectFileActions from './components/project/ProjectFileActions'
+import ProjectInfoCard from './components/project/ProjectInfoCard'
 import { useProject } from './hooks/useProject'
 import './App.css'
+import './styles/appshell.css'
 
 function App() {
   const [activeModule, setActiveModule] = useState(null)
   const [activePage, setActivePage] = useState('calculator')
   const [editingCableId, setEditingCableId] = useState(null)
-  const { project, deleteSavedCable, replaceCalculation } = useProject()
+  const [calculatorToolbarActions, setCalculatorToolbarActions] = useState(null)
+
+  const {
+    project,
+    updateProject,
+    newProject,
+    openProject,
+    deleteSavedCable,
+    replaceCalculation,
+  } = useProject()
 
   function openCableForEdit(savedCable) {
     const calculation = project.calculations.find((item) => item.type === 'lowVoltageCable')
@@ -32,22 +45,57 @@ function App() {
     setActivePage('calculator')
   }
 
-  if (activeModule === 'lowVoltageCable') {
-    return (
-      <main className="app-shell">
-        <div className="top-bar no-print">
-          <button type="button" className="back-button" onClick={() => setActiveModule(null)}>
-            ← Tilbake
-          </button>
-          <button type="button" className="settings-button">
-            ⚙ Innstillinger
-          </button>
-        </div>
+  function handleNewProject() {
+    newProject()
+    setEditingCableId(null)
+    setActivePage('calculator')
+    setActiveModule(null)
+  }
 
-        {activePage === 'cableList' ? (
+  function handleOpenProject(nextProject) {
+    openProject(nextProject)
+    setEditingCableId(null)
+    setActivePage('calculator')
+    setActiveModule(null)
+  }
+
+  const projectFileActions = (
+    <ProjectFileActions
+      project={project}
+      onNewProject={handleNewProject}
+      onOpenProject={handleOpenProject}
+    />
+  )
+
+  if (activeModule === 'lowVoltageCable') {
+    const isCableList = activePage === 'cableList'
+
+    return (
+      <AppShell
+        toolbarLeft={
+          isCableList ? (
+            <button type="button" className="back-button" onClick={() => setActivePage('calculator')}>
+              ← Tilbake til kalkulator
+            </button>
+          ) : (
+            <button type="button" className="back-button" onClick={() => setActiveModule(null)}>
+              ← Tilbake til prosjekt
+            </button>
+          )
+        }
+        toolbarRight={
+          isCableList ? (
+            <button type="button" className="secondary-action" onClick={() => window.print()}>
+              Eksporter PDF
+            </button>
+          ) : (
+            calculatorToolbarActions
+          )
+        }
+      >
+        {isCableList ? (
           <ProjectCableListPage
             project={project}
-            onBack={() => setActivePage('calculator')}
             onDelete={deleteSavedCable}
             onEdit={openCableForEdit}
             onCopy={copyCable}
@@ -57,32 +105,34 @@ function App() {
             editingCableId={editingCableId}
             onEditingDone={() => setEditingCableId(null)}
             onOpenCableList={() => setActivePage('cableList')}
+            onToolbarActionsChange={setCalculatorToolbarActions}
           />
         )}
-      </main>
+      </AppShell>
     )
   }
 
   return (
-    <main className="app-shell">
-      <section className="hero-section">
-        <div>
-          <p className="eyebrow">Prosjekteringsgrunnlag</p>
-          <h1>KabelKalk</h1>
-          <p className="lead">
-            Kabel- og lederberegning for strømføringsevne, spenningsfall og kortslutningskapasitet.
-          </p>
-        </div>
+    <AppShell toolbarRight={projectFileActions}>
+      <section className="home-intro">
+        <p className="lead">
+          Prosjektgrunnlag, beregninger og beregningsrapporter samlet i ett verktøy.
+        </p>
+      </section>
 
-        <button type="button" className="settings-button">
-          ⚙ Innstillinger
-        </button>
+      <div className="home-project-info">
+        <ProjectInfoCard project={project} onChange={updateProject} />
+      </div>
+
+      <section className="module-heading home-module-heading">
+        <p className="eyebrow">Verktøy</p>
+        <h2>Velg prosjekteringsverktøy</h2>
       </section>
 
       <section className="module-grid">
         <button type="button" className="module-card" onClick={() => setActiveModule('lowVoltageCable')}>
-          <h2>Lavspent kabel</h2>
-          <p>For kraftverk, industri, tavler, installasjon og fordelinger.</p>
+          <h2>Kabelberegning</h2>
+          <p>Lavspent kabel for kraftverk, industri, tavler, installasjon og fordelinger.</p>
           <span>Start beregning →</span>
         </button>
 
@@ -98,7 +148,7 @@ function App() {
           <span>Kommer senere</span>
         </button>
       </section>
-    </main>
+    </AppShell>
   )
 }
 

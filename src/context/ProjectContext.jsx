@@ -7,6 +7,17 @@ export const ProjectContext = createContext(null)
 export function ProjectProvider({ children }) {
   const [project, setProject] = useState(() => createEmptyProject())
 
+  function newProject() {
+    setProject(createEmptyProject())
+  }
+
+  function openProject(nextProject) {
+    setProject({
+      ...nextProject,
+      updatedAt: new Date().toISOString(),
+    })
+  }
+
   function updateProject(values) {
     setProject((current) => applyProjectUpdate(current, values))
   }
@@ -72,6 +83,8 @@ export function ProjectProvider({ children }) {
   const value = useMemo(
     () => ({
       project,
+      newProject,
+      openProject,
       updateProject,
       updateCalculation,
       updateCalculationGroup,

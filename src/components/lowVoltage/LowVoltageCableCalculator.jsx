@@ -1,7 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import CalculatorLayout from '../layout/CalculatorLayout'
 import ProjectHeader from '../project/ProjectHeader'
-import ProjectInfoCard from '../project/ProjectInfoCard'
 import CableNameCard from './CableNameCard'
 import SupplyCard from './SupplyCard'
 import InstallationCard from './InstallationCard'
@@ -22,16 +21,19 @@ import '../../styles/forms.css'
 import '../../styles/results.css'
 import '../../styles/project.css'
 
-export default function LowVoltageCableCalculator({ editingCableId, onEditingDone, onOpenCableList }) {
+export default function LowVoltageCableCalculator({
+  editingCableId,
+  onEditingDone,
+  onOpenCableList,
+  onToolbarActionsChange,
+}) {
   const {
     project,
-    updateProject,
     updateCalculation,
     updateCalculationGroup,
     saveCable,
     updateSavedCable,
   } = useProject()
-  const [showProjectInfo, setShowProjectInfo] = useState(false)
 
   const calculation = project.calculations.find((item) => item.type === 'lowVoltageCable')
 
@@ -149,19 +151,40 @@ export default function LowVoltageCableCalculator({ editingCableId, onEditingDon
   }
 
   const canSaveCable = Boolean(result && calculation.title.trim())
+  useEffect(() => {
+    if (!onToolbarActionsChange) return
+
+    onToolbarActionsChange(
+      <>
+        <button type="button" className="secondary-action" onClick={onOpenCableList}>
+          Kabelliste ({project.savedCables?.length ?? 0})
+        </button>
+
+        <button
+          type="button"
+          className="primary-action"
+          onClick={handleSaveCable}
+          disabled={!canSaveCable}
+          title={!calculation.title.trim() ? 'Gi kabelen et navn før den lagres' : undefined}
+        >
+          {editingCableId ? 'Oppdater kabel' : 'Lagre kabel'}
+        </button>
+      </>
+    )
+
+    return () => onToolbarActionsChange(null)
+  }, [
+    onToolbarActionsChange,
+    onOpenCableList,
+    project.savedCables?.length,
+    canSaveCable,
+    calculation.title,
+    editingCableId,
+  ])
 
   return (
     <>
-      <ProjectHeader
-        project={project}
-        onEditProject={() => setShowProjectInfo((current) => !current)}
-      />
-
-      {showProjectInfo && (
-        <div className="project-info-inline">
-          <ProjectInfoCard project={project} onChange={updateProject} defaultOpen />
-        </div>
-      )}
+      <ProjectHeader project={project} />
 
       <section className="module-heading compact module-heading-row">
         <div>
@@ -169,21 +192,6 @@ export default function LowVoltageCableCalculator({ editingCableId, onEditingDon
           <h2>Kabelberegning</h2>
         </div>
 
-        <div className="module-actions">
-          <button type="button" className="secondary-action" onClick={onOpenCableList}>
-            Kabelliste ({project.savedCables?.length ?? 0})
-          </button>
-
-          <button
-            type="button"
-            className="primary-action"
-            onClick={handleSaveCable}
-            disabled={!canSaveCable}
-            title={!calculation.title.trim() ? 'Gi kabelen et navn før den lagres' : undefined}
-          >
-            {editingCableId ? 'Oppdater kabel' : 'Lagre kabel'}
-          </button>
-        </div>
       </section>
 
       <CalculatorLayout
