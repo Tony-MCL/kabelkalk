@@ -16,9 +16,34 @@ export default function ProjectCableListPage({ project, onDelete, onEdit, onCopy
 
       <PrintReportHeader project={project} />
 
-      <div className="print-footer print-only">
-        <span>Beregningene er basert på NEN 62.75.</span>
-        <span>Generert med Manage Tools – morningcoffeelabs.no</span>
+      <div
+        className="print-footer print-only"
+        style={{
+          position: 'fixed',
+          left: '12mm',
+          right: '12mm',
+          bottom: '5mm',
+          margin: 0,
+          padding: 0,
+          border: 0,
+          fontSize: '8px',
+          color: '#64748b',
+          zIndex: 1000,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
+          <span style={{ textAlign: 'left' }}>Beregningene er basert på NEN 62.75.</span>
+          <span style={{ marginLeft: 'auto', textAlign: 'right' }}>
+            Generert med Manage Tools – morningcoffeelabs.no
+          </span>
+        </div>
       </div>
 
       {savedCables.length === 0 ? (
