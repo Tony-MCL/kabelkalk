@@ -491,8 +491,20 @@
     left: 12mm;
     right: 12mm;
     bottom: 5mm;
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    width: auto;
     font-size: 8px;
     color: #64748b;
+  }
+
+  .print-footer span:first-child {
+    text-align: left;
+  }
+
+  .print-footer span:last-child {
+    margin-left: auto;
     text-align: right;
   }
 
