@@ -17,7 +17,8 @@ export default function ProjectCableListPage({ project, onDelete, onEdit, onCopy
       <PrintReportHeader project={project} />
 
       <div className="print-footer print-only">
-        Denne beregningsrapporten ble generert med Manage Tools – morningcoffeelabs.no
+        <span>Beregningene er basert på NEN 62.75.</span>
+        <span>Generert med Manage Tools – morningcoffeelabs.no</span>
       </div>
 
       {savedCables.length === 0 ? (
