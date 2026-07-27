@@ -1,11 +1,55 @@
-import { createContext, useMemo, useState } from 'react'
+import { createContext, useEffect, useMemo, useState } from 'react'
 import { createEmptyProject } from '../data/emptyProject'
 import { updateProject as applyProjectUpdate } from '../models/Project'
 
+const PROJECT_STORAGE_KEY = 'manage-tools.active-project.v1'
+
 export const ProjectContext = createContext(null)
 
+function loadStoredProject() {
+  if (typeof window === 'undefined') {
+    return createEmptyProject()
+  }
+
+  try {
+    const storedValue = window.localStorage.getItem(PROJECT_STORAGE_KEY)
+
+    if (!storedValue) {
+      return createEmptyProject()
+    }
+
+    const storedProject = JSON.parse(storedValue)
+
+    if (!storedProject || typeof storedProject !== 'object') {
+      return createEmptyProject()
+    }
+
+    return {
+      ...createEmptyProject(),
+      ...storedProject,
+      calculations: Array.isArray(storedProject.calculations)
+        ? storedProject.calculations
+        : createEmptyProject().calculations,
+      savedCables: Array.isArray(storedProject.savedCables)
+        ? storedProject.savedCables
+        : [],
+    }
+  } catch (error) {
+    console.warn('Kunne ikke lese lagret Manage Tools-prosjekt.', error)
+    return createEmptyProject()
+  }
+}
+
 export function ProjectProvider({ children }) {
-  const [project, setProject] = useState(() => createEmptyProject())
+  const [project, setProject] = useState(loadStoredProject)
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(PROJECT_STORAGE_KEY, JSON.stringify(project))
+    } catch (error) {
+      console.warn('Kunne ikke lagre Manage Tools-prosjekt i nettleseren.', error)
+    }
+  }, [project])
 
   function newProject() {
     setProject(createEmptyProject())
