@@ -83,6 +83,7 @@ export default function ProjectCableListPage({ project, onDelete, onEdit, onCopy
 
 function PrintReportHeader({ project }) {
   const metaRows = [
+    ['Dato', new Date().toLocaleDateString('no-NO')],
     ['Firma', project.company],
     ['Kontaktperson', project.contactPerson],
     ['Adresse', project.address],
@@ -92,7 +93,6 @@ function PrintReportHeader({ project }) {
     ['Prosjekt', project.name],
     ['Anlegg', project.facility],
     ['Beskrivelse', project.description],
-    ['Dato', new Date().toLocaleDateString('no-NO')],
   ].filter(([, value]) => String(value ?? '').trim())
 
   return (
