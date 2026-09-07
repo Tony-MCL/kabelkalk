@@ -46,6 +46,8 @@ export function createMediumVoltageCableCalculation(overrides = {}) {
 
     supply: {
       voltageKv: 12,
+      cableVoltageClass: '12/24 kV',
+      sourceType: 'manualShortCircuit',
     },
 
     load: {
