@@ -30,6 +30,18 @@ export function resolveMediumVoltageCorrectionFactors({ area, installation }) {
   if (installation.environment === 'air') {
     const airTemperatureFactor =
       mvAirTemperatureFactors90C[String(installation.ambientTemperature)] ?? null
+    const parallelCount = Number(installation.parallelCircuits) || 1
+    const groupingSupported = parallelCount === 1
+    const warnings = []
+
+    if (airTemperatureFactor === null) {
+      warnings.push('Valgt lufttemperatur finnes ikke i NEN 62.75-tabellen for 90 °C ledertemperatur.')
+    }
+    if (!groupingSupported) {
+      warnings.push('Korreksjon for flere kabelsett i luft er ikke koblet inn ennå. Velg ett kabelsett for en komplett beregning.')
+    }
+
+    const supported = airTemperatureFactor !== null && groupingSupported
 
     return {
       environment: 'air',
@@ -37,12 +49,10 @@ export function resolveMediumVoltageCorrectionFactors({ area, installation }) {
       burialDepthFactor: 1,
       soilTemperatureFactor: 1,
       soilResistivityFactor: 1,
-      groupingFactor: 1,
-      totalFactor: airTemperatureFactor,
-      supported: airTemperatureFactor !== null,
-      warnings: airTemperatureFactor === null
-        ? ['Valgt lufttemperatur finnes ikke i NEN 62.75-tabellen for 90 °C ledertemperatur.']
-        : [],
+      groupingFactor: groupingSupported ? 1 : null,
+      totalFactor: supported ? airTemperatureFactor : null,
+      supported,
+      warnings,
     }
   }
 
