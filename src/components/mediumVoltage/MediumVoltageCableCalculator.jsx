@@ -44,6 +44,9 @@ export default function MediumVoltageCableCalculator() {
 
   if (!calculation) return null
 
+  const voltageKv = Number(calculation.supply.voltageKv)
+  const voltageIsValid = Number.isFinite(voltageKv) && voltageKv > 1 && voltageKv <= 36
+
   return (
     <>
       <ProjectHeader project={project} />
@@ -70,19 +73,26 @@ export default function MediumVoltageCableCalculator() {
 
                 <label className="form-field">
                   <span>Driftsspenning</span>
-                  <select
+                  <input
+                    type="number"
+                    min="1.01"
+                    max="36"
+                    step="0.1"
+                    inputMode="decimal"
                     value={calculation.supply.voltageKv}
-                    onChange={(event) => updateCalculationGroup(calculation.id, 'supply', { voltageKv: Number(event.target.value) })}
-                  >
-                    <option value={6}>6 kV</option>
-                    <option value={10}>10 kV</option>
-                    <option value={11}>11 kV</option>
-                    <option value={12}>12 kV</option>
-                    <option value={22}>22 kV</option>
-                    <option value={24}>24 kV</option>
-                    <option value={33}>33 kV</option>
-                    <option value={36}>36 kV</option>
-                  </select>
+                    onChange={(event) => updateCalculationGroup(calculation.id, 'supply', { voltageKv: event.target.value })}
+                  />
+                  <small>kV – faktisk system-/generatorspenning, f.eks. 8,0 eller 9,2 kV.</small>
+                  {!voltageIsValid && <small>Driftsspenningen må være over 1 kV og maksimalt 36 kV.</small>}
+                </label>
+
+                <label className="form-field">
+                  <span>Kabelens spenningsklasse</span>
+                  <input
+                    value={calculation.supply.cableVoltageClass ?? '12/24 kV'}
+                    readOnly
+                  />
+                  <small>Fast kabelklasse i denne arbeidsversjonen.</small>
                 </label>
 
                 <label className="form-field">
@@ -182,7 +192,7 @@ export default function MediumVoltageCableCalculator() {
                     value={calculation.requirements.shortCircuitCurrent}
                     onChange={(event) => updateCalculationGroup(calculation.id, 'requirements', { shortCircuitCurrent: event.target.value })}
                   />
-                  <small>kA – valgfritt</small>
+                  <small>kA – valgfritt. Senere kan denne beregnes fra generator-/nettkilden.</small>
                 </label>
 
                 <label className="form-field">
@@ -204,11 +214,14 @@ export default function MediumVoltageCableCalculator() {
           <SectionCard title="Resultat" subtitle="Arbeidsversjon – strømføring og kortslutning">
             {result ? (
               <div className="result-list">
+                <StatusValue label="Driftsspenning" value={voltageIsValid ? `${voltageKv.toLocaleString('no-NO')} kV` : 'Ugyldig verdi'} ok={voltageIsValid ? undefined : false} />
+                <StatusValue label="Kabelklasse" value={calculation.supply.cableVoltageClass ?? '12/24 kV'} />
                 <StatusValue label="Tabellverdi" value={`${result.baseCurrentCapacity.toFixed(0)} A`} />
                 <StatusValue label="Korrigert belastningsevne" value={`${result.currentCapacity.toFixed(0)} A`} ok={result.currentOk} />
                 <StatusValue label="Strømmargin" value={`${result.currentMargin.toFixed(0)} A`} ok={result.currentOk} />
                 <StatusValue label="Kortslutningsytelse" value={`${result.shortCircuitCapacityKA.toFixed(1)} kA`} ok={result.shortCircuitOk} />
                 <StatusValue label="Spenningsfall" value="Avventer R/X-datasett" />
+                <StatusValue label="Kortslutningsstrøm fra kilde" value="Senere generator-/nettkildemodell" />
               </div>
             ) : (
               <p>Velg gyldige beregningsdata.</p>
