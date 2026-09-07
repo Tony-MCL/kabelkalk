@@ -39,7 +39,7 @@ export function createLowVoltageCableCalculation(overrides = {}) {
 }
 
 export function createMediumVoltageCableCalculation(overrides = {}) {
-  return {
+  const base = {
     id: crypto.randomUUID(),
     type: 'mediumVoltageCable',
     title: 'Mellomspenningskabel 1',
@@ -63,7 +63,11 @@ export function createMediumVoltageCableCalculation(overrides = {}) {
       environment: 'ground',
       layout: 'trefoil',
       screenBonding: 'closed',
-      correctionFactor: 1,
+      burialDepth: 0.7,
+      soilTemperature: 15,
+      soilThermalResistivity: 100,
+      ambientTemperature: 25,
+      groupSpacing: '70mm',
     },
 
     requirements: {
@@ -71,7 +75,14 @@ export function createMediumVoltageCableCalculation(overrides = {}) {
       shortCircuitCurrent: '',
       disconnectionTime: 1,
     },
+  }
 
+  return {
+    ...base,
     ...overrides,
+    supply: { ...base.supply, ...(overrides.supply ?? {}) },
+    load: { ...base.load, ...(overrides.load ?? {}) },
+    installation: { ...base.installation, ...(overrides.installation ?? {}) },
+    requirements: { ...base.requirements, ...(overrides.requirements ?? {}) },
   }
 }
