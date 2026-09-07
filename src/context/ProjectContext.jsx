@@ -1,10 +1,29 @@
 import { createContext, useEffect, useMemo, useState } from 'react'
 import { createEmptyProject } from '../data/emptyProject'
+import { createMediumVoltageCableCalculation } from '../models/Calculation'
 import { updateProject as applyProjectUpdate } from '../models/Project'
 
 const PROJECT_STORAGE_KEY = 'manage-tools.active-project.v1'
 
 export const ProjectContext = createContext(null)
+
+function normalizeProject(project) {
+  const emptyProject = createEmptyProject()
+  const calculations = Array.isArray(project?.calculations)
+    ? [...project.calculations]
+    : [...emptyProject.calculations]
+
+  if (!calculations.some((item) => item.type === 'mediumVoltageCable')) {
+    calculations.push(createMediumVoltageCableCalculation())
+  }
+
+  return {
+    ...emptyProject,
+    ...project,
+    calculations,
+    savedCables: Array.isArray(project?.savedCables) ? project.savedCables : [],
+  }
+}
 
 function loadStoredProject() {
   if (typeof window === 'undefined') {
@@ -24,16 +43,7 @@ function loadStoredProject() {
       return createEmptyProject()
     }
 
-    return {
-      ...createEmptyProject(),
-      ...storedProject,
-      calculations: Array.isArray(storedProject.calculations)
-        ? storedProject.calculations
-        : createEmptyProject().calculations,
-      savedCables: Array.isArray(storedProject.savedCables)
-        ? storedProject.savedCables
-        : [],
-    }
+    return normalizeProject(storedProject)
   } catch (error) {
     console.warn('Kunne ikke lese lagret Manage Tools-prosjekt.', error)
     return createEmptyProject()
@@ -57,7 +67,7 @@ export function ProjectProvider({ children }) {
 
   function openProject(nextProject) {
     setProject({
-      ...nextProject,
+      ...normalizeProject(nextProject),
       updatedAt: new Date().toISOString(),
     })
   }
