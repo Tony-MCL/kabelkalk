@@ -10,7 +10,11 @@ export const ProjectContext = createContext(null)
 function normalizeProject(project) {
   const emptyProject = createEmptyProject()
   const calculations = Array.isArray(project?.calculations)
-    ? [...project.calculations]
+    ? project.calculations.map((calculation) =>
+        calculation.type === 'mediumVoltageCable'
+          ? createMediumVoltageCableCalculation(calculation)
+          : calculation
+      )
     : [...emptyProject.calculations]
 
   if (!calculations.some((item) => item.type === 'mediumVoltageCable')) {
