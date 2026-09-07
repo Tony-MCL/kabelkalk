@@ -37,3 +37,39 @@ export function createLowVoltageCableCalculation(overrides = {}) {
     ...overrides,
   }
 }
+
+export function createMediumVoltageCableCalculation(overrides = {}) {
+  return {
+    id: crypto.randomUUID(),
+    type: 'mediumVoltageCable',
+    title: 'Mellomspenningskabel 1',
+
+    supply: {
+      voltageKv: 12,
+    },
+
+    load: {
+      loadCurrent: 300,
+      cosPhi: 0.9,
+    },
+
+    installation: {
+      cableTypeId: 'single-core-al-pex',
+      area: 240,
+      length: 100,
+      parallelCircuits: 1,
+      environment: 'ground',
+      layout: 'trefoil',
+      screenBonding: 'closed',
+      correctionFactor: 1,
+    },
+
+    requirements: {
+      maxVoltageDropPercent: '',
+      shortCircuitCurrent: '',
+      disconnectionTime: 1,
+    },
+
+    ...overrides,
+  }
+}
