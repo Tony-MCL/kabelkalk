@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import LowVoltageCableCalculator from './components/lowVoltage/LowVoltageCableCalculator'
+import MediumVoltageCableCalculator from './components/mediumVoltage/MediumVoltageCableCalculator'
 import AppShell from './components/layout/AppShell'
 import ProjectCableListPage from './components/project/ProjectCableListPage'
 import ProjectFileActions from './components/project/ProjectFileActions'
@@ -112,6 +113,20 @@ function App() {
     )
   }
 
+  if (activeModule === 'mediumVoltageCable') {
+    return (
+      <AppShell
+        toolbarLeft={
+          <button type="button" className="back-button" onClick={() => setActiveModule(null)}>
+            ← Tilbake til prosjekt
+          </button>
+        }
+      >
+        <MediumVoltageCableCalculator />
+      </AppShell>
+    )
+  }
+
   return (
     <AppShell toolbarRight={projectFileActions}>
       <section className="home-intro">
@@ -136,9 +151,15 @@ function App() {
           <span>Start beregning →</span>
         </button>
 
+        <button type="button" className="module-card" onClick={() => setActiveModule('mediumVoltageCable')}>
+          <h2>Mellomspenningskabel</h2>
+          <p>Enleder aluminium PEX for 6–36 kV, med strømføring og kortslutningskontroll.</p>
+          <span>Start beregning →</span>
+        </button>
+
         <button type="button" className="module-card muted" disabled>
           <h2>Høyspent kabel</h2>
-          <p>Egen beregningsmodul for høyspentkabel.</p>
+          <p>Egen beregningsmodul for kabel over 36 kV.</p>
           <span>Kommer senere</span>
         </button>
 
