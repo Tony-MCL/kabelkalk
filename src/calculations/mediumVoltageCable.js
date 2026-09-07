@@ -15,7 +15,7 @@ export function calculateMediumVoltageCable(input) {
     environment,
     layout,
     screenBonding,
-    correctionFactor = 1,
+    correctionFactor,
     shortCircuitCurrent,
     disconnectionTime,
   } = input
@@ -27,10 +27,10 @@ export function calculateMediumVoltageCable(input) {
     screenBonding,
   })
 
-  if (!baseCurrentCapacity) return null
+  const factor = Number(correctionFactor)
+  if (!baseCurrentCapacity || !Number.isFinite(factor) || factor <= 0) return null
 
   const parallelCount = Math.max(1, Number(parallelCircuits) || 1)
-  const factor = Number(correctionFactor) || 1
   const designCurrent = Number(loadCurrent) || 0
   const currentCapacity = baseCurrentCapacity * factor * parallelCount
 
