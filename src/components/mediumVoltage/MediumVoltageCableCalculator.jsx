@@ -3,7 +3,14 @@ import CalculatorLayout from '../layout/CalculatorLayout'
 import ProjectHeader from '../project/ProjectHeader'
 import SectionCard from '../cards/SectionCard'
 import { mediumVoltageAreas } from '../../data/mediumVoltageCurrentRatings'
+import {
+  mvSupportedAirTemperatures,
+  mvSupportedGroupCounts,
+  mvSupportedSoilResistivities,
+  mvSupportedSoilTemperatures,
+} from '../../data/mediumVoltageCorrectionFactors'
 import { calculateMediumVoltageCable } from '../../calculations/mediumVoltageCable'
+import { resolveMediumVoltageCorrectionFactors } from '../../calculations/resolveMediumVoltageCorrectionFactors'
 import { useProject } from '../../hooks/useProject'
 import '../../styles/layout.css'
 import '../../styles/cards.css'
@@ -22,12 +29,25 @@ function StatusValue({ label, value, ok }) {
   )
 }
 
+function factorText(value) {
+  return value === null || value === undefined ? '—' : Number(value).toFixed(2)
+}
+
 export default function MediumVoltageCableCalculator() {
   const { project, updateCalculation, updateCalculationGroup } = useProject()
   const calculation = project.calculations.find((item) => item.type === 'mediumVoltageCable')
 
-  const result = useMemo(() => {
+  const correctionFactors = useMemo(() => {
     if (!calculation) return null
+
+    return resolveMediumVoltageCorrectionFactors({
+      area: calculation.installation.area,
+      installation: calculation.installation,
+    })
+  }, [calculation])
+
+  const result = useMemo(() => {
+    if (!calculation || !correctionFactors?.supported) return null
 
     return calculateMediumVoltageCable({
       area: calculation.installation.area,
@@ -36,16 +56,17 @@ export default function MediumVoltageCableCalculator() {
       environment: calculation.installation.environment,
       layout: calculation.installation.layout,
       screenBonding: calculation.installation.screenBonding,
-      correctionFactor: calculation.installation.correctionFactor,
+      correctionFactor: correctionFactors.totalFactor,
       shortCircuitCurrent: calculation.requirements.shortCircuitCurrent,
       disconnectionTime: calculation.requirements.disconnectionTime,
     })
-  }, [calculation])
+  }, [calculation, correctionFactors])
 
   if (!calculation) return null
 
   const voltageKv = Number(calculation.supply.voltageKv)
   const voltageIsValid = Number.isFinite(voltageKv) && voltageKv > 1 && voltageKv <= 36
+  const isGround = calculation.installation.environment === 'ground'
 
   return (
     <>
@@ -88,10 +109,7 @@ export default function MediumVoltageCableCalculator() {
 
                 <label className="form-field">
                   <span>Kabelens spenningsklasse</span>
-                  <input
-                    value={calculation.supply.cableVoltageClass ?? '12/24 kV'}
-                    readOnly
-                  />
+                  <input value={calculation.supply.cableVoltageClass ?? '12/24 kV'} readOnly />
                   <small>Fast kabelklasse i denne arbeidsversjonen.</small>
                 </label>
 
@@ -157,28 +175,107 @@ export default function MediumVoltageCableCalculator() {
 
                 <label className="form-field">
                   <span>Parallelle kabelsett</span>
-                  <input
-                    type="number"
-                    min="1"
-                    step="1"
+                  <select
                     value={calculation.installation.parallelCircuits}
-                    onChange={(event) => updateCalculationGroup(calculation.id, 'installation', { parallelCircuits: event.target.value })}
-                  />
-                </label>
-
-                <label className="form-field">
-                  <span>Samlet korreksjonsfaktor</span>
-                  <input
-                    type="number"
-                    min="0.01"
-                    max="2"
-                    step="0.01"
-                    value={calculation.installation.correctionFactor}
-                    onChange={(event) => updateCalculationGroup(calculation.id, 'installation', { correctionFactor: event.target.value })}
-                  />
-                  <small>Foreløpig manuelt felt. NEN-faktorene kobles inn som neste steg.</small>
+                    onChange={(event) => updateCalculationGroup(calculation.id, 'installation', { parallelCircuits: Number(event.target.value) })}
+                  >
+                    {mvSupportedGroupCounts.map((count) => (
+                      <option key={count} value={count}>{count}</option>
+                    ))}
+                  </select>
                 </label>
               </div>
+            </SectionCard>
+
+            <SectionCard
+              title="Korreksjonsfaktorer"
+              subtitle={isGround ? 'NEN 62.75 / NEN 62.75 A – forlegning i jord' : 'NEN 62.75 – forlegning i luft'}
+            >
+              {isGround ? (
+                <div className="installation-grid">
+                  <label className="form-field">
+                    <span>Forlegningsdybde</span>
+                    <input
+                      type="number"
+                      min="0.5"
+                      max="1.5"
+                      step="0.01"
+                      value={calculation.installation.burialDepth}
+                      onChange={(event) => updateCalculationGroup(calculation.id, 'installation', { burialDepth: event.target.value })}
+                    />
+                    <small>m – referanse 0,70 m</small>
+                  </label>
+
+                  <label className="form-field">
+                    <span>Jordtemperatur</span>
+                    <select
+                      value={calculation.installation.soilTemperature}
+                      onChange={(event) => updateCalculationGroup(calculation.id, 'installation', { soilTemperature: Number(event.target.value) })}
+                    >
+                      {mvSupportedSoilTemperatures.map((temperature) => (
+                        <option key={temperature} value={temperature}>{temperature} °C</option>
+                      ))}
+                    </select>
+                    <small>Referanse 15 °C</small>
+                  </label>
+
+                  <label className="form-field">
+                    <span>Termisk resistivitet jord</span>
+                    <select
+                      value={calculation.installation.soilThermalResistivity}
+                      onChange={(event) => updateCalculationGroup(calculation.id, 'installation', { soilThermalResistivity: Number(event.target.value) })}
+                    >
+                      {mvSupportedSoilResistivities.map((value) => (
+                        <option key={value} value={value}>{value} °C·cm/W</option>
+                      ))}
+                    </select>
+                    <small>Referanse 100 °C·cm/W</small>
+                  </label>
+
+                  {calculation.installation.layout === 'trefoil' ? (
+                    <label className="form-field">
+                      <span>Avstand mellom kabelsett</span>
+                      <select
+                        value={calculation.installation.groupSpacing}
+                        onChange={(event) => updateCalculationGroup(calculation.id, 'installation', { groupSpacing: event.target.value })}
+                      >
+                        <option value="tight">Tett</option>
+                        <option value="70mm">70 mm</option>
+                        <option value="250mm">250 mm</option>
+                      </select>
+                    </label>
+                  ) : (
+                    <div className="form-field">
+                      <span>Avstand mellom enlederkabler</span>
+                      <input value="70 mm" readOnly />
+                      <small>NEN 62.75 A-tabellen for flat gruppe er basert på 70 mm innbyrdes avstand.</small>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="form-grid">
+                  <label className="form-field">
+                    <span>Lufttemperatur</span>
+                    <select
+                      value={calculation.installation.ambientTemperature}
+                      onChange={(event) => updateCalculationGroup(calculation.id, 'installation', { ambientTemperature: Number(event.target.value) })}
+                    >
+                      {mvSupportedAirTemperatures.map((temperature) => (
+                        <option key={temperature} value={temperature}>{temperature} °C</option>
+                      ))}
+                    </select>
+                    <small>Referanse 25 °C</small>
+                  </label>
+                </div>
+              )}
+
+              {correctionFactors?.warnings?.length > 0 && (
+                <div>
+                  {correctionFactors.warnings.map((warning) => (
+                    <p key={warning}><strong>Merk:</strong> {warning}</p>
+                  ))}
+                </div>
+              )}
             </SectionCard>
 
             <SectionCard title="Kortslutning" subtitle="Aluminium / PEX, 90 → 250 °C">
@@ -211,22 +308,44 @@ export default function MediumVoltageCableCalculator() {
           </>
         }
         right={
-          <SectionCard title="Resultat" subtitle="Arbeidsversjon – strømføring og kortslutning">
-            {result ? (
+          <>
+            <SectionCard title="Resultat" subtitle="Strømføring og kortslutning">
+              {result ? (
+                <div className="result-list">
+                  <StatusValue label="Driftsspenning" value={voltageIsValid ? `${voltageKv.toLocaleString('no-NO')} kV` : 'Ugyldig verdi'} ok={voltageIsValid ? undefined : false} />
+                  <StatusValue label="Kabelklasse" value={calculation.supply.cableVoltageClass ?? '12/24 kV'} />
+                  <StatusValue label="Tabellverdi" value={`${result.baseCurrentCapacity.toFixed(0)} A`} />
+                  <StatusValue label="Samlet korreksjonsfaktor" value={factorText(correctionFactors.totalFactor)} />
+                  <StatusValue label="Korrigert belastningsevne" value={`${result.currentCapacity.toFixed(0)} A`} ok={result.currentOk} />
+                  <StatusValue label="Strømmargin" value={`${result.currentMargin.toFixed(0)} A`} ok={result.currentOk} />
+                  <StatusValue label="Kortslutningsytelse" value={`${result.shortCircuitCapacityKA.toFixed(1)} kA`} ok={result.shortCircuitOk} />
+                  <StatusValue label="Spenningsfall" value="Avventer R/X-datasett" />
+                  <StatusValue label="Kortslutningsstrøm fra kilde" value="Senere generator-/nettkildemodell" />
+                </div>
+              ) : (
+                <p>Beregningen mangler en tabellstøttet korreksjonsfaktor. Se merknadene under korreksjonsfaktorer.</p>
+              )}
+            </SectionCard>
+
+            <SectionCard title="Korreksjonsgrunnlag" subtitle="Faktorene som inngår i belastningsevnen">
               <div className="result-list">
-                <StatusValue label="Driftsspenning" value={voltageIsValid ? `${voltageKv.toLocaleString('no-NO')} kV` : 'Ugyldig verdi'} ok={voltageIsValid ? undefined : false} />
-                <StatusValue label="Kabelklasse" value={calculation.supply.cableVoltageClass ?? '12/24 kV'} />
-                <StatusValue label="Tabellverdi" value={`${result.baseCurrentCapacity.toFixed(0)} A`} />
-                <StatusValue label="Korrigert belastningsevne" value={`${result.currentCapacity.toFixed(0)} A`} ok={result.currentOk} />
-                <StatusValue label="Strømmargin" value={`${result.currentMargin.toFixed(0)} A`} ok={result.currentOk} />
-                <StatusValue label="Kortslutningsytelse" value={`${result.shortCircuitCapacityKA.toFixed(1)} kA`} ok={result.shortCircuitOk} />
-                <StatusValue label="Spenningsfall" value="Avventer R/X-datasett" />
-                <StatusValue label="Kortslutningsstrøm fra kilde" value="Senere generator-/nettkildemodell" />
+                {isGround ? (
+                  <>
+                    <StatusValue label="Forlegningsdybde" value={factorText(correctionFactors?.burialDepthFactor)} />
+                    <StatusValue label="Jordtemperatur" value={factorText(correctionFactors?.soilTemperatureFactor)} />
+                    <StatusValue label="Termisk resistivitet" value={factorText(correctionFactors?.soilResistivityFactor)} />
+                    <StatusValue label="Gruppering" value={factorText(correctionFactors?.groupingFactor)} />
+                  </>
+                ) : (
+                  <>
+                    <StatusValue label="Lufttemperatur" value={factorText(correctionFactors?.airTemperatureFactor)} />
+                    <StatusValue label="Gruppering" value={factorText(correctionFactors?.groupingFactor)} />
+                  </>
+                )}
+                <StatusValue label="Samlet faktor" value={factorText(correctionFactors?.totalFactor)} />
               </div>
-            ) : (
-              <p>Velg gyldige beregningsdata.</p>
-            )}
-          </SectionCard>
+            </SectionCard>
+          </>
         }
       />
     </>
